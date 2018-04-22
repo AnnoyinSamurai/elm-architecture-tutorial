@@ -1,85 +1,66 @@
 import Html exposing (..)
-import Html.Attributes exposing (..)
 import Html.Events exposing (..)
+import Html.Attributes exposing (..)
 import Http
 import Json.Decode as Decode
 
-
-
+main : Program Never Model Msg
 main =
-  Html.program
-    { init = init "cats"
-    , view = view
-    , update = update
-    , subscriptions = subscriptions
+    Html.program
+        { init = init ""
+        , view = view
+        , update = update
+        , subscriptions = subscriptions
     }
 
 
 
--- MODEL
-
-
 type alias Model =
-  { topic : String
-  , gifUrl : String
-  }
+    { topic : String
+    , gifUrl: String
+    }
 
 
 init : String -> (Model, Cmd Msg)
 init topic =
-  ( Model topic "waiting.gif"
+  ( Model topic ""
   , getRandomGif topic
   )
 
-
-
--- UPDATE
-
-
 type Msg
-  = MorePlease
-  | NewGif (Result Http.Error String)
+    = GetMore
+    | NewGif (Result Http.Error String)
+    | Change String
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
-  case msg of
-    MorePlease ->
-      (model, getRandomGif model.topic)
-
-    NewGif (Ok newUrl) ->
-      (Model model.topic newUrl, Cmd.none)
-
-    NewGif (Err _) ->
-      (model, Cmd.none)
-
-
-
--- VIEW
+    case msg of
+      GetMore ->
+        (model, getRandomGif model.topic)
+      NewGif (Ok newTopic) ->
+        (Model model.topic newTopic, Cmd.none)
+      NewGif (Err _) ->
+        (model, Cmd.none)
+      Change newTopic ->
+        ({model | topic = newTopic}, getRandomGif newTopic)
 
 
 view : Model -> Html Msg
 view model =
-  div []
-    [ h2 [] [text model.topic]
-    , button [ onClick MorePlease ] [ text "More Please!" ]
-    , br [] []
-    , img [src model.gifUrl] []
-    ]
-
-
-
--- SUBSCRIPTIONS
+    div [style [("padding","20px")]]
+      [ h2 [] [text model.topic]
+      , input [ placeholder "Gif this", onInput Change ] [text model.topic]
+      , button [ onClick GetMore ] [ text "More Please!" ]
+      , br [] []
+      , br [] []
+      , img [src model.gifUrl] []
+      ]
 
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-  Sub.none
-
-
-
--- HTTP
-
+    Sub.none
 
 getRandomGif : String -> Cmd Msg
 getRandomGif topic =
@@ -88,7 +69,6 @@ getRandomGif topic =
       "https://api.giphy.com/v1/gifs/random?api_key=dc6zaTOxFJmzC&tag=" ++ topic
   in
     Http.send NewGif (Http.get url decodeGifUrl)
-
 
 decodeGifUrl : Decode.Decoder String
 decodeGifUrl =

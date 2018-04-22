@@ -2,8 +2,6 @@ import Html exposing (..)
 import Html.Events exposing (..)
 import Random
 
-
-
 main =
   Html.program
     { init = init
@@ -11,7 +9,6 @@ main =
     , update = update
     , subscriptions = subscriptions
     }
-
 
 
 -- MODEL
@@ -23,38 +20,30 @@ type alias Model =
 
 
 init : (Model, Cmd Msg)
-init =
+init = 
   (Model 1, Cmd.none)
-
-
 
 -- UPDATE
 
 
 type Msg
-  = Roll
-  | NewFace Int
+    = Roll
+     | NewFace Int 
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
-    Roll ->
-      (model, Random.generate NewFace (Random.int 1 6))
-
-    NewFace newFace ->
-      (Model newFace, Cmd.none)
-
-
+   Roll -> 
+    (model, Random.generate NewFace (Random.int 1 199))
+   NewFace newface ->
+     (Model newface, Cmd.none)
 
 -- SUBSCRIPTIONS
 
-
 subscriptions : Model -> Sub Msg
 subscriptions model =
-  Sub.none
-
-
+    Sub.none
 
 -- VIEW
 
